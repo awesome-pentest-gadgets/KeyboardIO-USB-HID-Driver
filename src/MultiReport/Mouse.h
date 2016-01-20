@@ -38,49 +38,35 @@ THE SOFTWARE.
 // but the last 3 wont do anything from what I tested
 #define MOUSE_ALL (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE | MOUSE_PREV | MOUSE_NEXT)
 
-
-
 typedef union {
-    // Absolute mouse report: 8 buttons, 2 absolute axis, wheel
+    // Mouse report: 8 buttons, position, wheel
     uint8_t whole8[];
     uint16_t whole16[];
     uint32_t whole32[];
     struct {
         uint8_t buttons;
-        int16_t xAxis;
-        int16_t yAxis;
+        int8_t xAxis;
+        int8_t yAxis;
         int8_t wheel;
     };
-} HID_MouseAbsoluteReport_Data_t;
+} HID_MouseReport_Data_t;
 
-class AbsoluteMouse_ {
+
+class Mouse_ {
   public:
-    AbsoluteMouse_(void);
+    Mouse_(void);
     void begin(void);
     void end(void);
-
     void click(uint8_t b = MOUSE_LEFT);
-    void moveTo(int x, int y, signed char wheel = 0);
-    void move(int x, int y, signed char wheel = 0);
-    void press(uint8_t b = MOUSE_LEFT);
-    void release(uint8_t b = MOUSE_LEFT);
-    bool isPressed(uint8_t b = MOUSE_LEFT);
+    void move(signed char x, signed char y, signed char wheel = 0);
+    void press(uint8_t b = MOUSE_LEFT);   // press LEFT by default
+    void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
+    bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
 
-    // Sending is public in the base class for advanced users.
     void SendReport(void* data, int length);
 
   protected:
-    int16_t xAxis;
-    int16_t yAxis;
     uint8_t _buttons;
     void buttons(uint8_t b);
-
-    int16_t qadd16(int16_t base, int16_t increment);
-
-
-
 };
-
-
-extern AbsoluteMouse_ AbsoluteMouse;
-
+extern Mouse_ Mouse;

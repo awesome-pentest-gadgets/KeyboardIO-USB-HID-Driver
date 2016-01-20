@@ -21,15 +21,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "AbsoluteMouse.h"
+#include "Mouse.h"
 #include "DescriptorPrimitives.h"
 
-static const uint8_t _hidMultiReportDescriptorAbsoluteMouse[] PROGMEM = {
-    /*  Mouse absolute */
+static const uint8_t _hidMultiReportDescriptorMouse[] PROGMEM = {
+    /*  Mouse relative */
     _USAGE_PAGE, _PAGE_GENERIC_DESKTOP,                      /* USAGE_PAGE (Generic Desktop)	  54 */
     _USAGE, _USAGE_MOUSE,                      /* USAGE (Mouse) */
     _COLLECTION, _APPLICATION,                      /* COLLECTION (Application) */
-    _REPORT_ID, HID_REPORTID_MOUSE_ABSOLUTE,	/*     REPORT_ID */
+    _REPORT_ID, HID_REPORTID_MOUSE,				/*     REPORT_ID */
 
     /* 8 Buttons */
     _USAGE_PAGE, _PAGE_BUTTON,                      /*     USAGE_PAGE (Button) */
@@ -39,87 +39,47 @@ static const uint8_t _hidMultiReportDescriptorAbsoluteMouse[] PROGMEM = {
     _LOGICAL_MAXIMUM, 0x01,                      /*     LOGICAL_MAXIMUM (1) */
     _REPORT_COUNT, 0x08,                      /*     REPORT_COUNT (8) */
     _REPORT_SIZE, 0x01,                      /*     REPORT_SIZE (1) */
-    _INPUT, (_DATA|_VARIABLE|_ABSOLUTE),
+    _INPUT, (_DATA|_VARIABLE|_ABSOLUTE),                      /*     INPUT (Data,Var,Abs) */
 
-    /* X, Y */
+    /* X, Y, Wheel */
     _USAGE_PAGE, _PAGE_GENERIC_DESKTOP,                      /*     USAGE_PAGE (Generic Desktop) */
     _USAGE, 0x30,                      /*     USAGE (X) */
     _USAGE, 0x31,                      /*     USAGE (Y) */
-    _MULTIBYTE(_LOGICAL_MINIMUM), 0x00, 0x80,				 /* 	Logical Minimum (-32768) */
-    _MULTIBYTE(_LOGICAL_MAXIMUM), 0xFF, 0x7F,				 /* 	Logical Maximum (32767) */
-    _REPORT_SIZE, 0x10,						 /* 	Report Size (16), */
-    _REPORT_COUNT, 0x02,						 /* 	Report Count (2), */
-    _INPUT, (_DATA|_VARIABLE|_ABSOLUTE),						 /* 	Input (Data, Variable, Absolute) */
-
-    /* Wheel */
     _USAGE, 0x38,                      /*     USAGE (Wheel) */
     _LOGICAL_MINIMUM, 0x81,                      /*     LOGICAL_MINIMUM (-127) */
     _LOGICAL_MAXIMUM, 0x7f,                      /*     LOGICAL_MAXIMUM (127) */
     _REPORT_SIZE, 0x08,                      /*     REPORT_SIZE (8) */
-    _REPORT_COUNT, 0x01,                      /*     REPORT_COUNT (1) */
-    _INPUT, (_DATA|_VARIABLE|_RELATIVE),
+    _REPORT_COUNT, 0x03,                      /*     REPORT_COUNT (3) */
+    _INPUT, (_DATA|_VARIABLE|_RELATIVE), /*     INPUT (Data,Var,Rel) */
 
     /* End */
-    _END_COLLECTION
+    _END_COLLECTION                            /* END_COLLECTION */
 };
 
-AbsoluteMouse_::AbsoluteMouse_(void) {
-    static HIDSubDescriptor node(_hidMultiReportDescriptorAbsoluteMouse, sizeof(_hidMultiReportDescriptorAbsoluteMouse));
+
+Mouse_::Mouse_(void) {
+    static HIDSubDescriptor node(_hidMultiReportDescriptorMouse, sizeof(_hidMultiReportDescriptorMouse));
     HID().AppendDescriptor(&node);
 }
 
-
-void AbsoluteMouse_::SendReport(void* data, int length) {
-    HID().SendReport(HID_REPORTID_MOUSE_ABSOLUTE, data, length);
-}
-
-
-void AbsoluteMouse_::buttons(uint8_t b) {
-    if (b != _buttons) {
-        _buttons = b;
-        moveTo(xAxis, yAxis, 0);
-    }
-}
-
-int16_t AbsoluteMouse_::qadd16(int16_t base, int16_t increment) {
-    // Separate between subtracting and adding
-    if (increment < 0) {
-        // Subtracting more would cause an undefined overflow
-        if ((int16_t)0x8000 - increment > base)
-            base = 0x8000;
-        else
-            base += increment;
-    } else {
-        // Adding more would cause an undefined overflow
-        if ((int16_t)0x7FFF - increment < base)
-            base = 0x7FFF;
-        else
-            base += increment;
-    }
-    return base;
-}
-
-void AbsoluteMouse_::begin(void) {
-    // release all buttons
+void Mouse_::begin(void) {
     end();
 }
 
-void AbsoluteMouse_::end(void) {
+void Mouse_::end(void) {
     _buttons = 0;
-    moveTo(xAxis, yAxis, 0);
+    move(0, 0, 0);
 }
 
-void AbsoluteMouse_::click(uint8_t b) {
+void Mouse_::click(uint8_t b) {
     _buttons = b;
-    moveTo(xAxis, yAxis, 0);
+    move(0,0,0);
     _buttons = 0;
-    moveTo(xAxis, yAxis, 0);
+    move(0,0,0);
 }
 
-void AbsoluteMouse_::moveTo(int x, int y, signed char wheel) {
-    xAxis = x;
-    yAxis = y;
-    HID_MouseAbsoluteReport_Data_t report;
+void Mouse_::move(signed char x, signed char y, signed char wheel) {
+    HID_MouseReport_Data_t report;
     report.buttons = _buttons;
     report.xAxis = x;
     report.yAxis = y;
@@ -127,27 +87,32 @@ void AbsoluteMouse_::moveTo(int x, int y, signed char wheel) {
     SendReport(&report, sizeof(report));
 }
 
-void AbsoluteMouse_::move(int x, int y, signed char wheel) {
-    moveTo(qadd16(xAxis, x), qadd16(yAxis, y), wheel);
+void Mouse_::buttons(uint8_t b) {
+    if (b != _buttons) {
+        _buttons = b;
+        move(0,0,0);
+    }
 }
 
-void AbsoluteMouse_::press(uint8_t b) {
-    // press LEFT by default
+void Mouse_::press(uint8_t b) {
     buttons(_buttons | b);
 }
 
-void AbsoluteMouse_::release(uint8_t b) {
-    // release LEFT by default
+void Mouse_::release(uint8_t b) {
     buttons(_buttons & ~b);
 }
 
-bool AbsoluteMouse_::isPressed(uint8_t b) {
-    // check LEFT by default
+bool Mouse_::isPressed(uint8_t b) {
     if ((b & _buttons) > 0)
         return true;
     return false;
 }
 
 
-AbsoluteMouse_ AbsoluteMouse;
+void Mouse_::SendReport(void* data, int length) {
+    HID().SendReport(HID_REPORTID_MOUSE, data, length);
+}
+
+Mouse_ Mouse;
+
 

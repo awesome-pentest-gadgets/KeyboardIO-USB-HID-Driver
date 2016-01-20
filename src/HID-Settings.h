@@ -24,51 +24,6 @@ THE SOFTWARE.
 // Include guard
 #pragma once
 
-//================================================================================
-// Settings
-//================================================================================
-
-//#define LAYOUT_US_ENGLISH
-//#define LAYOUT_CANADIAN_FRENCH
-//#define LAYOUT_CANADIAN_MULTILINGUAL
-//#define LAYOUT_DANISH
-//#define LAYOUT_FINNISH
-//#define LAYOUT_FRENCH
-//#define LAYOUT_FRENCH_BELGIAN
-//#define LAYOUT_FRENCH_SWISS
-//#define LAYOUT_GERMAN
-//#define LAYOUT_GERMAN_MAC
-//#define LAYOUT_GERMAN_SWISS
-//#define LAYOUT_ICELANDIC
-//#define LAYOUT_IRISH
-//#define LAYOUT_ITALIAN
-//#define LAYOUT_NORWEGIAN
-//#define LAYOUT_PORTUGUESE
-//#define LAYOUT_PORTUGUESE_BRAZILIAN
-//#define LAYOUT_SPANISH
-//#define LAYOUT_SPANISH_LATIN_AMERICA
-//#define LAYOUT_SWEDISH
-//#define LAYOUT_TURKISH
-//#define LAYOUT_UNITED_KINGDOM
-//#define LAYOUT_US_INTERNATIONAL
-
-//================================================================================
-// Definitions and Helpers
-//================================================================================
-
-// Default US keyboard layout
-#if !defined(LAYOUT_CANADIAN_FRENCH) && !defined(LAYOUT_CANADIAN_MULTILINGUAL) \
-&& !defined(LAYOUT_DANISH) && !defined(LAYOUT_FINNISH) && !defined(LAYOUT_FRENCH) \
-&& !defined(LAYOUT_FRENCH_BELGIAN) && !defined(LAYOUT_FRENCH_SWISS) && !defined(LAYOUT_GERMAN) \
-&& !defined(LAYOUT_GERMAN_MAC) && !defined(LAYOUT_GERMAN_SWISS) && !defined(LAYOUT_ICELANDIC) \
-&& !defined(LAYOUT_IRISH) && !defined(LAYOUT_ITALIAN) && !defined(LAYOUT_NORWEGIAN) \
-&& !defined(LAYOUT_PORTUGUESE) && !defined(LAYOUT_PORTUGUESE_BRAZILIAN) \
-&& !defined(LAYOUT_SPANISH) && !defined(LAYOUT_SPANISH_LATIN_AMERICA) \
-&& !defined(LAYOUT_SWEDISH) && !defined(LAYOUT_TURKISH) && !defined(LAYOUT_UNITED_KINGDOM) \
-&& !defined(LAYOUT_US_INTERNATIONAL) && !defined(LAYOUT_US_ENGLISH)
-#define LAYOUT_US_ENGLISH
-#endif
-
 #define HID_REPORTID_NONE 0
 
 #ifndef HID_REPORTID_MOUSE
@@ -105,6 +60,9 @@ THE SOFTWARE.
 #define HID_REPORTID_NKRO_KEYBOARD 8
 #endif
 
-#ifndef HID_REPORTID_TEENSY_KEYBOARD
-#define HID_REPORTID_TEENSY_KEYBOARD 9
-#endif
+
+// Nico has submitted these definitions upstream, but they're not merged yet
+// HID Request Type HID1.11 Page 51 7.2.1 Get_Report Request
+#define HID_REPORT_TYPE_INPUT   1
+#define HID_REPORT_TYPE_OUTPUT  2
+#define HID_REPORT_TYPE_FEATURE 3

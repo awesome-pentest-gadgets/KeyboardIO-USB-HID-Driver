@@ -5,8 +5,6 @@
   Consumer example
   Press a button to play/pause music player
 
-  You may also use SingleConsumer to use a single report.
-
   See HID Project documentation for more Consumer keys.
   https://github.com/NicoHood/HID/wiki/Consumer-API
 */
@@ -21,7 +19,7 @@ void setup() {
   pinMode(pinButton, INPUT_PULLUP);
 
   // Sends a clean report to the host. This is important on any Arduino type.
-  Consumer.begin();
+  ConsumerControl.begin();
 }
 
 void loop() {
@@ -29,7 +27,7 @@ void loop() {
     digitalWrite(pinLed, HIGH);
 
     // See HID Project documentation for more Consumer keys
-    Consumer.write(MEDIA_PLAY_PAUSE);
+    ConsumerControl.write(MEDIA_PLAY_PAUSE);
 
     // Simple debounce
     delay(300);

@@ -25,36 +25,26 @@ THE SOFTWARE.
 #pragma once
 
 // Software version
-#define HID_PROJECT_VERSION 240
+#define HID_PROJECT_VERSION 241
 
-// TODO remove https://github.com/arduino/arduino-builder/issues/33
-#include <Arduino.h>
-
-#if ARDUINO < 10606
-#error HID Project requires Arduino IDE 1.6.6 or greater. Please update your IDE.
+#if ARDUINO < 10607
+#error HID Project requires Arduino IDE 1.6.7 or greater. Please update your IDE.
 #endif
 
 #if !defined(USBCON)
 #error HID Project can only be used with an USB MCU.
 #endif
 
+
+#include "LEDs.h"
+
+
 // Include all HID libraries (.a linkage required to work) properly
-#include "SingleReport/SingleAbsoluteMouse.h"
 #include "MultiReport/AbsoluteMouse.h"
-#include "SingleReport/BootMouse.h"
-#include "MultiReport/ImprovedMouse.h"
-#include "SingleReport/SingleConsumer.h"
-#include "MultiReport/Consumer.h"
-#include "SingleReport/SingleGamepad.h"
+#include "MultiReport/Mouse.h"
+#include "MultiReport/ConsumerControl.h"
 #include "MultiReport/Gamepad.h"
-#include "SingleReport/SingleSystem.h"
-#include "MultiReport/System.h"
-#include "SingleReport/RawHID.h"
-#include "SingleReport/BootKeyboard.h"
-#include "MultiReport/ImprovedKeyboard.h"
-#include "SingleReport/SingleNKROKeyboard.h"
-#include "MultiReport/NKROKeyboard.h"
+#include "MultiReport/SystemControl.h"
+#include "MultiReport/Keyboard.h"
 
-// Include Teensy HID afterwards to overwrite key definitions if used
-// TODO include Teensy API if non english keyboard layout was used
-
+#include "BootKeyboard/BootKeyboard.h"

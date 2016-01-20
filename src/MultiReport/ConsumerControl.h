@@ -29,58 +29,36 @@ THE SOFTWARE.
 #include "HID.h"
 #include "HID-Settings.h"
 
-#define MOUSE_LEFT		(1 << 0)
-#define MOUSE_RIGHT		(1 << 1)
-#define MOUSE_MIDDLE	(1 << 2)
-#define MOUSE_PREV		(1 << 3)
-#define MOUSE_NEXT		(1 << 4)
-// actually this mouse report has 8 buttons (for smaller descriptor)
-// but the last 3 wont do anything from what I tested
-#define MOUSE_ALL (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE | MOUSE_PREV | MOUSE_NEXT)
-
-
-
 typedef union {
-    // Absolute mouse report: 8 buttons, 2 absolute axis, wheel
+    // Every usable Consumer key possible, up to 4 keys presses possible
     uint8_t whole8[];
     uint16_t whole16[];
     uint32_t whole32[];
+    uint16_t keys[4];
     struct {
-        uint8_t buttons;
-        int16_t xAxis;
-        int16_t yAxis;
-        int8_t wheel;
+        uint16_t key1;
+        uint16_t key2;
+        uint16_t key3;
+        uint16_t key4;
     };
-} HID_MouseAbsoluteReport_Data_t;
+} HID_ConsumerControlReport_Data_t;
 
-class AbsoluteMouse_ {
+
+class ConsumerControl_ {
   public:
-    AbsoluteMouse_(void);
+    ConsumerControl_(void);
     void begin(void);
     void end(void);
-
-    void click(uint8_t b = MOUSE_LEFT);
-    void moveTo(int x, int y, signed char wheel = 0);
-    void move(int x, int y, signed char wheel = 0);
-    void press(uint8_t b = MOUSE_LEFT);
-    void release(uint8_t b = MOUSE_LEFT);
-    bool isPressed(uint8_t b = MOUSE_LEFT);
+    void write(uint16_t m);
+    void press(uint16_t m);
+    void release(uint16_t m);
+    void releaseAll(void);
 
     // Sending is public in the base class for advanced users.
     void SendReport(void* data, int length);
 
+
   protected:
-    int16_t xAxis;
-    int16_t yAxis;
-    uint8_t _buttons;
-    void buttons(uint8_t b);
-
-    int16_t qadd16(int16_t base, int16_t increment);
-
-
-
+    HID_ConsumerControlReport_Data_t _report;
 };
-
-
-extern AbsoluteMouse_ AbsoluteMouse;
-
+extern ConsumerControl_ ConsumerControl;
