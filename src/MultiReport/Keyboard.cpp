@@ -115,6 +115,7 @@ void Keyboard_::begin(void) {
   // while the sender is resetted.
   releaseAll();
   sendReport();
+  BootKeyboard.begin();
 }
 
 
@@ -126,10 +127,16 @@ void Keyboard_::end(void) {
 
 
 int Keyboard_::sendReport(void) {
+  if (BootKeyboard.getProtocol() == HID_BOOT_PROTOCOL ) {
+	return BootKeyboard.sendReport(k);
+  }
   return HID().SendReport(HID_REPORTID_NKRO_KEYBOARD, &_keyReport, sizeof(_keyReport));
 }
 
 boolean Keyboard_::isModifierActive(uint8_t k) {
+  if (BootKeyboard.getProtocol() == HID_BOOT_PROTOCOL ) {
+	return BootKeyboard.isModifierActive(k);
+  }
   if (k >= HID_KEYBOARD_FIRST_MODIFIER && k <= HID_KEYBOARD_LAST_MODIFIER) {
     k = k - HID_KEYBOARD_FIRST_MODIFIER;
     return !!(_keyReport.modifiers & (1 << k));
@@ -138,6 +145,9 @@ boolean Keyboard_::isModifierActive(uint8_t k) {
 }
 
 size_t Keyboard_::press(uint8_t k) {
+  if (BootKeyboard.getProtocol() == HID_BOOT_PROTOCOL ) {
+	return BootKeyboard.press(k);
+  }
   // If the key is in the range of 'printable' keys
   if (k <= HID_KEYPAD_HEXADECIMAL) {
     uint8_t bit = 1 << (uint8_t(k) % 8);
@@ -158,6 +168,9 @@ size_t Keyboard_::press(uint8_t k) {
 }
 
 size_t Keyboard_::release(uint8_t k) {
+  if (BootKeyboard.getProtocol() == HID_BOOT_PROTOCOL ) {
+	return BootKeyboard.release(k);
+  }
   // If we're releasing a printable key
   if (k <= HID_KEYPAD_HEXADECIMAL) {
     uint8_t bit = 1 << (k % 8);
@@ -179,6 +192,9 @@ size_t Keyboard_::release(uint8_t k) {
 
 void Keyboard_::releaseAll(void) {
   // Release all keys
+  if (BootKeyboard.getProtocol() == HID_BOOT_PROTOCOL ) {
+	return BootKeyboard.releaseAll();
+  }
   memset(&_keyReport.allkeys, 0x00, sizeof(_keyReport.allkeys));
 }
 
