@@ -30,61 +30,15 @@ static const uint8_t _hidMultiReportDescriptorConsumer[] PROGMEM = {
   D_USAGE, 0x01, 								/* usage -- consumer control */
   D_COLLECTION, D_APPLICATION, 								/* collection (application) */
   D_REPORT_ID, HID_REPORTID_CONSUMERCONTROL, 		/* report id */
-  /* 4 Media Keys */
-  D_LOGICAL_MINIMUM, 0x00, 								/* logical minimum */
-  D_MULTIBYTE(D_LOGICAL_MAXIMUM), 0xFF, 0x03, 							/* logical maximum (3ff) */
-  D_USAGE_MINIMUM, 0x00, 								/* usage minimum (0) */
-  D_MULTIBYTE(D_USAGE_MAXIMUM), 0xFF, 0x03, 							/* usage maximum (3ff) */
-  D_REPORT_COUNT, 0x04, 								/* report count (4) */
-  D_REPORT_SIZE, 0x10, 								/* report size (16) */
-  D_INPUT, 0x00, 								/* input */
+   
+  DESCRIPTOR_CONSUMER_CONTROL_KEYS
+
   D_END_COLLECTION /* end collection */
 };
 
 ConsumerControl_::ConsumerControl_(void) {
   static HIDSubDescriptor node(_hidMultiReportDescriptorConsumer, sizeof(_hidMultiReportDescriptorConsumer));
   HID().AppendDescriptor(&node);
-}
-
-void ConsumerControl_::begin(void) {
-  // release all buttons
-  end();
-}
-
-void ConsumerControl_::end(void) {
-  memset(&_report, 0, sizeof(_report));
-  sendReport(&_report, sizeof(_report));
-}
-
-void ConsumerControl_::write(uint16_t m) {
-  press(m);
-  release(m);
-}
-
-void ConsumerControl_::press(uint16_t m) {
-  // search for a free spot
-  for (uint8_t i = 0; i < sizeof(HID_ConsumerControlReport_Data_t) / 2; i++) {
-    if (_report.keys[i] == 0x00) {
-      _report.keys[i] = m;
-      break;
-    }
-  }
-  sendReport(&_report, sizeof(_report));
-}
-
-void ConsumerControl_::release(uint16_t m) {
-  // search and release the keypress
-  for (uint8_t i = 0; i < sizeof(HID_ConsumerControlReport_Data_t) / 2; i++) {
-    if (_report.keys[i] == m) {
-      _report.keys[i] = 0x00;
-      // no break to delete multiple keys
-    }
-  }
-  sendReport(&_report, sizeof(_report));
-}
-
-void ConsumerControl_::releaseAll(void) {
-  end();
 }
 
 void ConsumerControl_::sendReport(void* data, int length) {

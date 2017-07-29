@@ -29,26 +29,15 @@ THE SOFTWARE.
 #include "HID.h"
 #include "HID-Settings.h"
 #include "HIDTables.h"
-
-typedef union {
-  // Every usable system control key possible
-  uint8_t key;
-} HID_SystemControlReport_Data_t;
+#include "DeviceAPIs/SystemControlAPI.h"
 
 
-class SystemControl_ {
+class SystemControl_ : public SystemControlAPI {
  public:
-  void begin(void);
-  void end(void);
-  void write(uint8_t s);
-  void press(uint8_t s);
-  void release(void);
-  void releaseAll(void);
-  void sendReport(void* data, int length);
-
   SystemControl_(void);
 
  protected:
+  virtual void sendReport(void* data, int length);
 };
 
 

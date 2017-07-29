@@ -21,29 +21,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "SystemControl.h"
+// Include guard
+#pragma once
+
+#include <Arduino.h>
+#include "PluggableUSB.h"
+#include "HID.h"
+#include "HID-Settings.h"
+#include "HIDTables.h"
 #include "DescriptorPrimitives.h"
 
-static const uint8_t _hidMultiReportDescriptorSystem[] PROGMEM = {
-  //TODO limit to system keys only?
-  /*  System Control (Power Down, Sleep, Wakeup, ...) */
-  D_USAGE_PAGE, D_PAGE_GENERIC_DESKTOP,								/* USAGE_PAGE (Generic Desktop) */
-  D_USAGE, 0x80,								/* USAGE (System Control) */
-  D_COLLECTION, D_APPLICATION, 							/* COLLECTION (Application) */
-  D_REPORT_ID, HID_REPORTID_SYSTEMCONTROL,		/* REPORT_ID */
+#define DESCRIPTOR_SYSTEMCONTROL_KEY   \
+  /* 1 system key */   \
+  D_LOGICAL_MINIMUM, 0x00, 							/* LOGICAL_MINIMUM (0) */   \
+  D_MULTIBYTE(D_LOGICAL_MAXIMUM), 0xff, 0x00, 						/* LOGICAL_MAXIMUM (255) */   \
+  D_USAGE_MINIMUM, 0x00, 							/* USAGE_MINIMUM (Undefined) */   \
+  D_USAGE_MAXIMUM, 0xff, 							/* USAGE_MAXIMUM (System Menu Down) */   \
+  D_REPORT_COUNT, 0x01, 							/* REPORT_COUNT (1) */   \
+  D_REPORT_SIZE, 0x08, 							/* REPORT_SIZE (8) */   \
+  D_INPUT, (D_DATA|D_ARRAY|D_ABSOLUTE), 							/* INPUT (Data,Ary,Abs) */  
 
-  DESCRIPTOR_SYSTEMCONTROL_KEY
+typedef union {
+  // Every usable system control key possible
+  uint8_t key;
+} HID_SystemControlReport_Data_t;
 
-  D_END_COLLECTION 									/* END_COLLECTION */
+
+class SystemControlAPI {
+ public:
+  inline void begin(void);
+  inline void end(void);
+  inline void write(uint8_t s);
+  inline void press(uint8_t s);
+  inline void release(void);
+  inline void releaseAll(void);
+
+  inline SystemControlAPI (void);
+
+ protected:
+  virtual void sendReport(void* data, int length);
 };
 
-SystemControl_::SystemControl_(void) {
-  static HIDSubDescriptor node(_hidMultiReportDescriptorSystem, sizeof(_hidMultiReportDescriptorSystem));
-  HID().AppendDescriptor(&node);
-}
+#include "SystemControlAPI.hpp"
 
-void SystemControl_::sendReport(void* data, int length) {
-  HID().SendReport(HID_REPORTID_SYSTEMCONTROL, data, length);
-}
-
-SystemControl_ SystemControl;

@@ -21,29 +21,49 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "SystemControl.h"
-#include "DescriptorPrimitives.h"
+#pragma once
 
-static const uint8_t _hidMultiReportDescriptorSystem[] PROGMEM = {
-  //TODO limit to system keys only?
-  /*  System Control (Power Down, Sleep, Wakeup, ...) */
-  D_USAGE_PAGE, D_PAGE_GENERIC_DESKTOP,								/* USAGE_PAGE (Generic Desktop) */
-  D_USAGE, 0x80,								/* USAGE (System Control) */
-  D_COLLECTION, D_APPLICATION, 							/* COLLECTION (Application) */
-  D_REPORT_ID, HID_REPORTID_SYSTEMCONTROL,		/* REPORT_ID */
 
-  DESCRIPTOR_SYSTEMCONTROL_KEY
-
-  D_END_COLLECTION 									/* END_COLLECTION */
-};
-
-SystemControl_::SystemControl_(void) {
-  static HIDSubDescriptor node(_hidMultiReportDescriptorSystem, sizeof(_hidMultiReportDescriptorSystem));
-  HID().AppendDescriptor(&node);
+ConsumerControlAPI::ConsumerControlAPI(void) {
 }
 
-void SystemControl_::sendReport(void* data, int length) {
-  HID().SendReport(HID_REPORTID_SYSTEMCONTROL, data, length);
+void ConsumerControlAPI::begin(void) {
+  // release all buttons
+  end();
 }
 
-SystemControl_ SystemControl;
+void ConsumerControlAPI::end(void) {
+  memset(&_report, 0, sizeof(_report));
+  sendReport(&_report, sizeof(_report));
+}
+
+void ConsumerControlAPI::write(uint16_t m) {
+  press(m);
+  release(m);
+}
+
+void ConsumerControlAPI::press(uint16_t m) {
+  // search for a free spot
+  for (uint8_t i = 0; i < sizeof(HID_ConsumerControlReport_Data_t) / 2; i++) {
+    if (_report.keys[i] == 0x00) {
+      _report.keys[i] = m;
+      break;
+    }
+  }
+  sendReport(&_report, sizeof(_report));
+}
+
+void ConsumerControlAPI::release(uint16_t m) {
+  // search and release the keypress
+  for (uint8_t i = 0; i < sizeof(HID_ConsumerControlReport_Data_t) / 2; i++) {
+    if (_report.keys[i] == m) {
+      _report.keys[i] = 0x00;
+      // no break to delete multiple keys
+    }
+  }
+  sendReport(&_report, sizeof(_report));
+}
+
+void ConsumerControlAPI::releaseAll(void) {
+  end();
+}

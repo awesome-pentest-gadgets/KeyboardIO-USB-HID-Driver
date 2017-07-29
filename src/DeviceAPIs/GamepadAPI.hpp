@@ -21,29 +21,82 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "SystemControl.h"
-#include "DescriptorPrimitives.h"
+#pragma once
 
-static const uint8_t _hidMultiReportDescriptorSystem[] PROGMEM = {
-  //TODO limit to system keys only?
-  /*  System Control (Power Down, Sleep, Wakeup, ...) */
-  D_USAGE_PAGE, D_PAGE_GENERIC_DESKTOP,								/* USAGE_PAGE (Generic Desktop) */
-  D_USAGE, 0x80,								/* USAGE (System Control) */
-  D_COLLECTION, D_APPLICATION, 							/* COLLECTION (Application) */
-  D_REPORT_ID, HID_REPORTID_SYSTEMCONTROL,		/* REPORT_ID */
-
-  DESCRIPTOR_SYSTEMCONTROL_KEY
-
-  D_END_COLLECTION 									/* END_COLLECTION */
-};
-
-SystemControl_::SystemControl_(void) {
-  static HIDSubDescriptor node(_hidMultiReportDescriptorSystem, sizeof(_hidMultiReportDescriptorSystem));
-  HID().AppendDescriptor(&node);
+GamepadAPI::GamepadAPI(void) {
 }
 
-void SystemControl_::sendReport(void* data, int length) {
-  HID().SendReport(HID_REPORTID_SYSTEMCONTROL, data, length);
+
+void GamepadAPI::begin(void) {
+  // release all buttons
+  end();
 }
 
-SystemControl_ SystemControl;
+void GamepadAPI::end(void) {
+  memset(&_report, 0x00, sizeof(_report));
+  sendReport(&_report, sizeof(_report));
+}
+
+void GamepadAPI::write(void) {
+  sendReport(&_report, sizeof(_report));
+}
+
+
+void GamepadAPI::press(uint8_t b) {
+  _report.buttons |= (uint32_t)1 << (b - 1);
+}
+
+
+void GamepadAPI::release(uint8_t b) {
+  _report.buttons &= ~((uint32_t)1 << (b - 1));
+}
+
+
+void GamepadAPI::releaseAll(void) {
+  memset(&_report, 0x00, sizeof(_report));
+}
+
+void GamepadAPI::buttons(uint32_t b) {
+  _report.buttons = b;
+}
+
+
+void GamepadAPI::xAxis(int16_t a) {
+  _report.xAxis = a;
+}
+
+
+void GamepadAPI::yAxis(int16_t a) {
+  _report.yAxis = a;
+}
+
+
+void GamepadAPI::zAxis(int8_t a) {
+  _report.zAxis = a;
+}
+
+
+void GamepadAPI::rxAxis(int16_t a) {
+  _report.rxAxis = a;
+}
+
+
+void GamepadAPI::ryAxis(int16_t a) {
+  _report.ryAxis = a;
+}
+
+
+void GamepadAPI::rzAxis(int8_t a) {
+  _report.rzAxis = a;
+}
+
+
+void GamepadAPI::dPad1(int8_t d) {
+  _report.dPad1 = d;
+}
+
+
+void GamepadAPI::dPad2(int8_t d) {
+  _report.dPad2 = d;
+}
+

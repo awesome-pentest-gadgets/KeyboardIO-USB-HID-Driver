@@ -21,29 +21,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "SystemControl.h"
-#include "DescriptorPrimitives.h"
+#pragma once
 
-static const uint8_t _hidMultiReportDescriptorSystem[] PROGMEM = {
-  //TODO limit to system keys only?
-  /*  System Control (Power Down, Sleep, Wakeup, ...) */
-  D_USAGE_PAGE, D_PAGE_GENERIC_DESKTOP,								/* USAGE_PAGE (Generic Desktop) */
-  D_USAGE, 0x80,								/* USAGE (System Control) */
-  D_COLLECTION, D_APPLICATION, 							/* COLLECTION (Application) */
-  D_REPORT_ID, HID_REPORTID_SYSTEMCONTROL,		/* REPORT_ID */
+SystemControlAPI::SystemControlAPI(void) {}
 
-  DESCRIPTOR_SYSTEMCONTROL_KEY
-
-  D_END_COLLECTION 									/* END_COLLECTION */
-};
-
-SystemControl_::SystemControl_(void) {
-  static HIDSubDescriptor node(_hidMultiReportDescriptorSystem, sizeof(_hidMultiReportDescriptorSystem));
-  HID().AppendDescriptor(&node);
+void SystemControlAPI::begin(void) {
+  // release all buttons
+  end();
 }
 
-void SystemControl_::sendReport(void* data, int length) {
-  HID().SendReport(HID_REPORTID_SYSTEMCONTROL, data, length);
+void SystemControlAPI::end(void) {
+  uint8_t _report = 0x00;
+  sendReport(&_report, sizeof(_report));
 }
 
-SystemControl_ SystemControl;
+void SystemControlAPI::write(uint8_t s) {
+  press(s);
+  release();
+}
+
+void SystemControlAPI::release(void) {
+  begin();
+}
+
+void SystemControlAPI::releaseAll(void) {
+  begin();
+}
+
+void SystemControlAPI::press(uint8_t s) {
+  if (s == HID_SYSTEM_WAKE_UP)
+    USBDevice.wakeupHost();
+  else
+    sendReport(&s, sizeof(s));
+}
+
+
