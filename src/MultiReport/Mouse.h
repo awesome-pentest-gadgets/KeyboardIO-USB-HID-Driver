@@ -28,34 +28,13 @@ THE SOFTWARE.
 #include "PluggableUSB.h"
 #include "HID.h"
 #include "HID-Settings.h"
-#include "../MouseButtons.h"
+#include "DeviceAPIs/MouseAPI.h"
 
-typedef union {
-  // Mouse report: 8 buttons, position, wheel
-  struct {
-    uint8_t buttons;
-    int8_t xAxis;
-    int8_t yAxis;
-    int8_t wheel;
-  };
-} HID_MouseReport_Data_t;
+class Mouse_ : public MouseAPI {
+  public:
+    Mouse_(void);
 
-
-class Mouse_ {
- public:
-  Mouse_(void);
-  void begin(void);
-  void end(void);
-  void click(uint8_t b = MOUSE_LEFT);
-  void move(signed char x, signed char y, signed char wheel = 0);
-  void press(uint8_t b = MOUSE_LEFT);   // press LEFT by default
-  void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
-  bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
-
-  void sendReport(void* data, int length);
-
- protected:
-  uint8_t _buttons;
-  void buttons(uint8_t b);
+  protected:
+    virtual void sendReport(void* data, int length);
 };
 extern Mouse_ Mouse;

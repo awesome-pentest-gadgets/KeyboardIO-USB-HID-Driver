@@ -21,32 +21,53 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "Mouse.h"
-#include "DescriptorPrimitives.h"
+#pragma once
 
-static const uint8_t _hidMultiReportDescriptorMouse[] PROGMEM = {
-    /*  Mouse */
-    D_USAGE_PAGE, D_PAGE_GENERIC_DESKTOP,         /* USAGE_PAGE (Generic Desktop)         54 */
-    D_USAGE, D_USAGE_MOUSE,                             /* USAGE (Mouse) */
-    D_COLLECTION, D_APPLICATION,                        /* COLLECTION (Application) */
-    D_REPORT_ID, HID_REPORTID_MOUSE_ABSOLUTE,   /*  REPORT_ID */
+MouseAPI::MouseAPI(void) { }
 
-    DESCRIPTOR_MOUSE_BUTTONS
-    DESCRIPTOR_MOUSE_XY_WHEEL
-
-    D_END_COLLECTION                             /* End */
-};
-
-
-
-
-Mouse_::Mouse_(void) {
-  static HIDSubDescriptor node(_hidMultiReportDescriptorMouse, sizeof(_hidMultiReportDescriptorMouse));
-  HID().AppendDescriptor(&node);
+void MouseAPI::begin(void) {
+  end();
 }
 
-void Mouse_::sendReport(void* data, int length) {
-  HID().SendReport(HID_REPORTID_MOUSE, data, length);
+void MouseAPI::end(void) {
+  _buttons = 0;
+  move(0, 0, 0);
 }
 
-Mouse_ Mouse;
+void MouseAPI::click(uint8_t b) {
+  _buttons = b;
+  move(0,0,0);
+  _buttons = 0;
+  move(0,0,0);
+}
+
+void MouseAPI::move(signed char x, signed char y, signed char wheel) {
+  HID_MouseReport_Data_t report;
+  report.buttons = _buttons;
+  report.xAxis = x;
+  report.yAxis = y;
+  report.wheel = wheel;
+  sendReport(&report, sizeof(report));
+}
+
+void MouseAPI::buttons(uint8_t b) {
+  if (b != _buttons) {
+    _buttons = b;
+    move(0,0,0);
+  }
+}
+
+void MouseAPI::press(uint8_t b) {
+  buttons(_buttons | b);
+}
+
+void MouseAPI::release(uint8_t b) {
+  buttons(_buttons & ~b);
+}
+
+bool MouseAPI::isPressed(uint8_t b) {
+  if ((b & _buttons) > 0)
+    return true;
+  return false;
+}
+
