@@ -28,41 +28,15 @@ THE SOFTWARE.
 #include "PluggableUSB.h"
 #include "HID.h"
 #include "HID-Settings.h"
+#include "DeviceAPIs/NKROKeyboardAPI.h"
 
-#include "HIDTables.h"
-#include "HIDAliases.h"
-
-#define KEY_BYTES 28
-
-typedef union {
-  // Modifiers + keymap
-  struct {
-    uint8_t modifiers;
-    uint8_t keys[KEY_BYTES ];
-  };
-  uint8_t allkeys[1 + KEY_BYTES];
-} HID_KeyboardReport_Data_t;
-
-
-
-class Keyboard_ {
+class Keyboard_ : public NKROKeyboardAPI {
  public:
   Keyboard_(void);
-  void begin(void);
-  void end(void);
-
-  size_t press(uint8_t k);
-  size_t release(uint8_t k);
-  void  releaseAll(void);
-  int sendReport(void);
-
-  boolean isModifierActive(uint8_t k);
-
+  virtual int sendReport(void);
  protected:
-  HID_KeyboardReport_Data_t _keyReport;
-  HID_KeyboardReport_Data_t _lastKeyReport;
  private:
-  int sendReportUnchecked(void);
 };
+
 extern Keyboard_ Keyboard;
 
