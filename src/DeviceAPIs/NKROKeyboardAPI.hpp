@@ -39,23 +39,30 @@ void NKROKeyboardAPI::end(void) {
 NKROKeyboardAPI::NKROKeyboardAPI(void) {}
 
 boolean NKROKeyboardAPI::isModifierActive(uint8_t k) {
-  if (k >= HID_KEYBOARD_FIRST_MODIFIER && k <= HID_KEYBOARD_LAST_MODIFIER) {
+  if (isModifierKey(k)) {
     k = k - HID_KEYBOARD_FIRST_MODIFIER;
     return !!(_keyReport.modifiers & (1 << k));
   }
   return false;
 }
 
+boolean NKROKeyboardAPI::isModifierKey(uint8_t k) {
+  if (k >= HID_KEYBOARD_FIRST_MODIFIER && k <= HID_KEYBOARD_LAST_MODIFIER) {
+	return true;
+  }
+  return false;
+}
+
 size_t NKROKeyboardAPI::press(uint8_t k) {
   // If the key is in the range of 'printable' keys
-  if (k <= HID_KEYPAD_HEXADECIMAL) {
+  if (k <= HID_LAST_KEY) {
     uint8_t bit = 1 << (uint8_t(k) % 8);
     _keyReport.keys[k / 8] |= bit;
     return 1;
   }
 
   // It's a modifier key
-  else if (k >= HID_KEYBOARD_FIRST_MODIFIER && k <= HID_KEYBOARD_LAST_MODIFIER) {
+  else if (isModifierKey(k)) {
     // Convert key into bitfield (0 - 7)
     k = k - HID_KEYBOARD_FIRST_MODIFIER;
     _keyReport.modifiers |= (1 << k);
@@ -68,14 +75,14 @@ size_t NKROKeyboardAPI::press(uint8_t k) {
 
 size_t NKROKeyboardAPI::release(uint8_t k) {
   // If we're releasing a printable key
-  if (k <= HID_KEYPAD_HEXADECIMAL) {
+  if (k <= HID_LAST_KEY) {
     uint8_t bit = 1 << (k % 8);
     _keyReport.keys[k / 8] &= ~bit;
     return 1;
   }
 
   // It's a modifier key
-  else if (k >= HID_KEYBOARD_FIRST_MODIFIER && k <= HID_KEYBOARD_LAST_MODIFIER) {
+  else if (isModifierKey(k)) {
     // Convert key into bitfield (0 - 7)
     k = k - HID_KEYBOARD_FIRST_MODIFIER;
     _keyReport.modifiers &= ~(1 << k);

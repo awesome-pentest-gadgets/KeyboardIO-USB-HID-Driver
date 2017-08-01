@@ -107,12 +107,12 @@ class NKROKeyboardAPI {
   inline NKROKeyboardAPI(void);
   inline void begin(void);
   inline void end(void);
-
   inline size_t press(uint8_t k);
   inline size_t release(uint8_t k);
   inline void  releaseAll(void);
   virtual int sendReport(void);
 
+  inline boolean isModifierKey(uint8_t k);
   inline boolean isModifierActive(uint8_t k);
 
  protected:
